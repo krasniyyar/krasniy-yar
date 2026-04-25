@@ -1,0 +1,214 @@
+[index.html](https://github.com/user-attachments/files/27085172/index.html)
+<script>
+// =====================
+// 1. КАЛЕНДАРЬ
+// =====================
+function updateCalendar(){
+const date=new Date();
+
+const options={month:'long',day:'numeric',weekday:'long'};
+document.getElementById('calDate').innerText=
+date.toLocaleDateString('ru-RU',options);
+
+const day=date.getDate();
+const month=date.getMonth()+1;
+const key=day+"-"+month;
+
+const holidays={
+"7-1":"Рождество Христово",
+"19-1":"Крещение Господне",
+"7-4":"Благовещение",
+"20-4":"Пасха",
+"8-6":"Троица",
+"14-10":"Покров",
+"4-11":"Казанская",
+"31-12":"Канун Нового года"
+};
+
+if(holidays[key]){
+document.getElementById('calHoliday').innerText=
+"Сегодня праздник: "+holidays[key];
+document.getElementById('calDesc').innerText=
+"С праздником и добрым днем.";
+}else{
+document.getElementById('calHoliday').innerText=
+"Народный календарь";
+document.getElementById('calDesc').innerText=
+"Хороший день для труда и домашних дел.";
+}
+}
+updateCalendar();
+
+
+// =====================
+// 2. БЛИЖАЙШИЙ ПРАЗДНИК
+// =====================
+function updateTimer(){
+
+const today=new Date();
+
+let year=today.getFullYear();
+
+let holidays=[
+{name:"Рождество",date:new Date(year,0,7)},
+{name:"Крещение",date:new Date(year,0,19)},
+{name:"Благовещение",date:new Date(year,3,7)},
+{name:"Пасха",date:new Date(year,3,20)},
+{name:"Троица",date:new Date(year,5,8)},
+{name:"Покров",date:new Date(year,9,14)},
+{name:"Новый год",date:new Date(year,11,31)}
+];
+
+let nextHoliday=null;
+
+for(let h of holidays){
+if(h.date>=today){
+nextHoliday=h;
+break;
+}
+}
+
+if(!nextHoliday){
+nextHoliday={
+name:"Рождество",
+date:new Date(year+1,0,7)
+};
+}
+
+let diff=
+Math.ceil(
+(nextHoliday.date-today)/(1000*60*60*24)
+);
+
+let text="";
+
+if(diff===0){
+text="Сегодня "+nextHoliday.name+" ✨";
+}
+else if(diff<=3){
+text="До "+nextHoliday.name+" — "+diff+" дн.";
+}
+else{
+text=diff+" дн.";
+}
+
+document.getElementById('daysLeft').innerText=text;
+
+document.querySelector('.timer-title').innerText=
+"🎉 Ближайший праздник";
+
+document.querySelector('.timer-sub').innerText=
+nextHoliday.name;
+}
+updateTimer();
+
+
+// =====================
+// 3. ПОГОДА
+// =====================
+function getWeatherIcon(code){
+if(code===0)return "☀";
+if(code<=3)return "⛅";
+if(code<=67)return "🌧";
+if(code<=77)return "❄";
+return "☁";
+}
+
+async function getWeather(){
+try{
+const r=await fetch(
+'https://api.open-meteo.com/v1/forecast?latitude=59.20&longitude=68.68&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto'
+);
+
+const data=await r.json();
+
+document.getElementById('wTemp').innerText=
+Math.round(data.current_weather.temperature)+"°";
+
+document.getElementById('wWind').innerText=
+"Ветер "+
+Math.round(data.current_weather.windspeed/3.6)
++" м/с";
+
+document.getElementById('wIcon').innerText=
+getWeatherIcon(
+data.current_weather.weathercode
+);
+
+document.getElementById('wDesc').innerText=
+"Местный прогноз";
+}
+catch{
+document.getElementById('wDesc').innerText=
+"Нет связи";
+}
+}
+getWeather();
+
+
+// =====================
+// 4. КАЛЕНДАРЬ ХОЗЯИНА
+// =====================
+function getGardenAdvice(){
+
+let m=new Date().getMonth()+1;
+
+let advice="";
+
+if(m===1||m===2){
+advice=
+"❄ Время планировать посадки, проверять семена.";
+}
+
+else if(m===3){
+advice=
+"🌱 Сейте томаты и перцы на рассаду.";
+}
+
+else if(m===4){
+advice=
+"🌱 Для Уватского района — время лука, редиса, капусты.";
+}
+
+else if(m===5){
+advice=
+"🥔 Посадка картофеля, моркови, свеклы.";
+}
+
+else if(m===6){
+advice=
+"🌿 Прополка, окучивание, высадка огурцов.";
+}
+
+else if(m===7){
+advice=
+"🍓 Подкормки, сбор раннего урожая.";
+}
+
+else if(m===8){
+advice=
+"🥕 Сбор урожая. Сеять зелень второй волной.";
+}
+
+else if(m===9){
+advice=
+"🧄 Время озимого чеснока.";
+}
+
+else if(m===10){
+advice=
+"🍂 Подготовка почвы к зиме.";
+}
+
+else{
+advice=
+"🌙 Земля отдыхает. Планируйте новый сезон.";
+}
+
+document.getElementById('moonAdvice').innerText=
+advice;
+}
+
+getGardenAdvice();
+
+</script>
