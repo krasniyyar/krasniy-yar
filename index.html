@@ -1,7 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Мой сайт</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f5f5f5;
+text-align:center;
+padding:20px;
+}
+
+.block{
+background:white;
+padding:15px;
+margin:10px auto;
+max-width:300px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h2{
+margin-bottom:10px;
+}
+</style>
+
+</head>
+<body>
+
+<div class="block">
+<h2 id="calDate"></h2>
+<div id="calHoliday"></div>
+<div id="calDesc"></div>
+</div>
+
+<div class="block">
+<h2 class="timer-title"></h2>
+<div id="daysLeft"></div>
+<div class="timer-sub"></div>
+</div>
+
+<div class="block">
+<h2>Погода</h2>
+<div id="wIcon" style="font-size:30px"></div>
+<div id="wTemp"></div>
+<div id="wWind"></div>
+<div id="wDesc"></div>
+</div>
+
+<div class="block">
+<h2>Совет</h2>
+<div id="moonAdvice"></div>
+</div>
+
 <script>
-// =====================
-// 1. КАЛЕНДАРЬ
-// =====================
+
+// КАЛЕНДАРЬ
 function updateCalendar(){
 const date=new Date();
 
@@ -28,83 +83,46 @@ if(holidays[key]){
 document.getElementById('calHoliday').innerText=
 "Сегодня праздник: "+holidays[key];
 document.getElementById('calDesc').innerText=
-"С праздником и добрым днем.";
+"С праздником!";
 }else{
 document.getElementById('calHoliday').innerText=
-"Народный календарь";
+"Обычный день";
 document.getElementById('calDesc').innerText=
-"Хороший день для труда и домашних дел.";
+"Хороший день для дел.";
 }
 }
 updateCalendar();
 
 
-// =====================
-// 2. БЛИЖАЙШИЙ ПРАЗДНИК
-// =====================
+// ТАЙМЕР
 function updateTimer(){
 
 const today=new Date();
-
 let year=today.getFullYear();
 
 let holidays=[
-{name:"Рождество",date:new Date(year,0,7)},
-{name:"Крещение",date:new Date(year,0,19)},
-{name:"Благовещение",date:new Date(year,3,7)},
-{name:"Пасха",date:new Date(year,3,20)},
-{name:"Троица",date:new Date(year,5,8)},
-{name:"Покров",date:new Date(year,9,14)},
 {name:"Новый год",date:new Date(year,11,31)}
 ];
 
-let nextHoliday=null;
+let nextHoliday=holidays[0];
 
-for(let h of holidays){
-if(h.date>=today){
-nextHoliday=h;
-break;
-}
-}
-
-if(!nextHoliday){
-nextHoliday={
-name:"Рождество",
-date:new Date(year+1,0,7)
-};
-}
-
-let diff=
-Math.ceil(
+let diff=Math.ceil(
 (nextHoliday.date-today)/(1000*60*60*24)
 );
 
-let text="";
-
-if(diff===0){
-text="Сегодня "+nextHoliday.name+" ✨";
-}
-else if(diff<=3){
-text="До "+nextHoliday.name+" — "+diff+" дн.";
-}
-else{
-text=diff+" дн.";
-}
-
-document.getElementById('daysLeft').innerText=text;
+document.getElementById('daysLeft').innerText=
+"До Нового года: "+diff+" дней";
 
 document.querySelector('.timer-title').innerText=
 "🎉 Ближайший праздник";
 
 document.querySelector('.timer-sub').innerText=
-nextHoliday.name;
+"Новый год";
 }
 updateTimer();
 
 
-// =====================
-// 3. ПОГОДА
-// =====================
+// ПОГОДА
 function getWeatherIcon(code){
 if(code===0)return "☀";
 if(code<=3)return "⛅";
@@ -116,7 +134,7 @@ return "☁";
 async function getWeather(){
 try{
 const r=await fetch(
-'https://api.open-meteo.com/v1/forecast?latitude=59.20&longitude=68.68&current_weather=true&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=auto'
+'https://api.open-meteo.com/v1/forecast?latitude=59.20&longitude=68.68&current_weather=true&timezone=auto'
 );
 
 const data=await r.json();
@@ -125,17 +143,13 @@ document.getElementById('wTemp').innerText=
 Math.round(data.current_weather.temperature)+"°";
 
 document.getElementById('wWind').innerText=
-"Ветер "+
-Math.round(data.current_weather.windspeed/3.6)
-+" м/с";
+"Ветер "+Math.round(data.current_weather.windspeed/3.6)+" м/с";
 
 document.getElementById('wIcon').innerText=
-getWeatherIcon(
-data.current_weather.weathercode
-);
+getWeatherIcon(data.current_weather.weathercode);
 
 document.getElementById('wDesc').innerText=
-"Местный прогноз";
+"Прогноз";
 }
 catch{
 document.getElementById('wDesc').innerText=
@@ -145,69 +159,23 @@ document.getElementById('wDesc').innerText=
 getWeather();
 
 
-// =====================
-// 4. КАЛЕНДАРЬ ХОЗЯИНА
-// =====================
+// СОВЕТ
 function getGardenAdvice(){
-
 let m=new Date().getMonth()+1;
-
 let advice="";
 
-if(m===1||m===2){
-advice=
-"❄ Время планировать посадки, проверять семена.";
-}
+if(m<=2) advice="❄ Планируйте посадки";
+else if(m<=4) advice="🌱 Время рассады";
+else if(m<=6) advice="🌿 Посадка и уход";
+else if(m<=8) advice="🍓 Сбор урожая";
+else if(m<=10) advice="🍂 Подготовка к зиме";
+else advice="🌙 Отдых";
 
-else if(m===3){
-advice=
-"🌱 Сейте томаты и перцы на рассаду.";
+document.getElementById('moonAdvice').innerText=advice;
 }
-
-else if(m===4){
-advice=
-"🌱 Для Уватского района — время лука, редиса, капусты.";
-}
-
-else if(m===5){
-advice=
-"🥔 Посадка картофеля, моркови, свеклы.";
-}
-
-else if(m===6){
-advice=
-"🌿 Прополка, окучивание, высадка огурцов.";
-}
-
-else if(m===7){
-advice=
-"🍓 Подкормки, сбор раннего урожая.";
-}
-
-else if(m===8){
-advice=
-"🥕 Сбор урожая. Сеять зелень второй волной.";
-}
-
-else if(m===9){
-advice=
-"🧄 Время озимого чеснока.";
-}
-
-else if(m===10){
-advice=
-"🍂 Подготовка почвы к зиме.";
-}
-
-else{
-advice=
-"🌙 Земля отдыхает. Планируйте новый сезон.";
-}
-
-document.getElementById('moonAdvice').innerText=
-advice;
-}
-
 getGardenAdvice();
 
 </script>
+
+</body>
+</html>
